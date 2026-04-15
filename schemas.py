@@ -1,35 +1,47 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-class Trigger(BaseModel):
+class TriggerCreate(BaseModel):
     type: str
     expected_status: int
     observed_status: int
     failed_attempts: int
 
-class Evidence(BaseModel):
+class EvidenceCreate(BaseModel):
     response_time_in_ms: int
     cpu_usage_percent: float
     memory_usage_percent: float
     error_message: str
 
-class Resolution(BaseModel):
+class ResolutionCreate(BaseModel):
     action_taken: str
     action_result: str
     date: str
 
-class CreateItem(BaseModel):
+class IncidentCreate(BaseModel):
     title: str
     service: str
     type: str
     severity: str
     summary: str
     source: str
-    trigger: Trigger
-    evidence: Evidence
-    resolution: Resolution
+    trigger: TriggerCreate
+    evidence: EvidenceCreate
+    resolution: ResolutionCreate
 
-class Item(CreateItem):
+class TriggerResponse(TriggerCreate):
+    id: int
+    incident_id: int
+
+class EvidenceResponse(EvidenceCreate):
+    id: int
+    incident_id: int
+
+class ResolutionResponse(ResolutionCreate):
+    id: int
+    incident_id: int
+
+class IncidentResponse(IncidentCreate):
     id: int
     date: datetime
     status: str

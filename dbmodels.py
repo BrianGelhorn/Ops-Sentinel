@@ -50,7 +50,7 @@ class Resolution(DBaseModel):
     id = Column(Integer, primary_key=True)
     action_taken = Column(String, nullable=False)
     action_result = Column(String, nullable=False)
-    date = Column(DateTime, nullable=False)
+    date = Column(String, nullable=False)
     incident_id = Column(Integer, ForeignKey("incident.id"), unique=True)
 
     incident = relationship("Incident", back_populates="resolution")
