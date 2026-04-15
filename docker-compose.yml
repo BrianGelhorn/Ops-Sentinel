@@ -3,3 +3,10 @@ services:
     build: .
     ports: 
       - "8000:8000"
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /app
+        - action: rebuild
+          path: requirements.txt
