@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from routers import health, incidents, ready
+from dbconection import engine, DBaseModel
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    DBaseModel.metadata.create_all(engine)
+    yield
+    pass
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(health.router)
 app.include_router(incidents.router)
