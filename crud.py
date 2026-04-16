@@ -2,6 +2,7 @@ from dbconection import session
 from dbmodels import Incident, Trigger, Evidence, Resolution
 from schemas import *
 from datetime import datetime, UTC
+from typing import Optional
 
 def create_incident(item: IncidentCreate) -> Incident:
     itemData = item.model_dump(exclude={"trigger", "evidence", "resolution"})
@@ -27,5 +28,37 @@ def upload_to_database(item):
 def get_from_database(model, id):
     return session.get(model, id)
 
+
+
 def get_all_from_database(model):
     return session.query(model).all()
+
+def get_incidents_from_database(                      
+                    id: Optional[int] = None,
+                    title: Optional[str] = None,
+                    service: Optional[str] = None,
+                    type: Optional[str] = None, 
+                    severity: Optional[str] = None,
+                    source: Optional[str] = None    ):
+    query = session.query(Incident)
+
+    if id is not None:
+        query = query.filter(Incident.id == id)
+    
+    if title is not None:
+        query = query.filter(Incident.title == title)
+    
+    if service is not None:
+        query = query.filter(Incident.service == service)
+
+    if type is not None:
+        query = query.filter(Incident.type == type)
+    
+    if severity is not None:
+        query = query.filter(Incident.severity == severity)
+
+    if source is not None:
+        query = query.filter(Incident.source == source)
+    return query.all()
+
+    
