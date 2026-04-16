@@ -39,7 +39,7 @@ def get_incidents_from_database(
                     service: Optional[str] = None,
                     type: Optional[str] = None, 
                     severity: Optional[str] = None,
-                    source: Optional[str] = None    ):
+                    source: Optional[str] = None):
     query = session.query(Incident)
 
     if id is not None:
