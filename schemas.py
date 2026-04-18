@@ -14,9 +14,9 @@ class EvidenceCreate(BaseModel):
     error_message: str
 
 class ResolutionCreate(BaseModel):
-    action_taken: str = None
-    action_result: str = None
-    date: str = None
+    action_taken: str | None = None
+    action_result: str | None = None
+    date: str | None = None
     
 class IncidentCreate(BaseModel):
     title: str
@@ -47,7 +47,7 @@ class IncidentResponse(IncidentCreate):
     status: str
 
 class IncidentPatch(BaseModel):
-    status: str = None
-    summary: str = None
-    severity: str = None
-    resolution: ResolutionCreate = None
+    status: str | None = None
+    summary: str | None = None
+    severity: str | None = None
+    resolution: ResolutionCreate | None = None
