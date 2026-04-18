@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 from typing import Optional
-from schemas import *
+from schemas.incident import *
 from crud import create_incident, upload_to_database, get_all_from_database, get_incidents_from_database, get_from_database
 from dbmodels import Incident
 import logging
