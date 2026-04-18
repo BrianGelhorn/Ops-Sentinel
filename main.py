@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import health, incidents, ready
+from routers import health, incidents, ready, monitors
 from database.dbconection import engine, DBaseModel
 from contextlib import asynccontextmanager
 
@@ -15,3 +15,4 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(health.router)
 app.include_router(incidents.router)
 app.include_router(ready.router)
+app.include_router(monitors.router)

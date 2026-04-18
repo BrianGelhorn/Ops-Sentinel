@@ -69,7 +69,8 @@ class Monitor(DBaseModel):
     __tablename__ = "monitor"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
-    interval: Mapped[int] = mapped_column(Integer, nullable=False)
+    interval_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     
     config: Mapped["HttpMonitorConfig"] = relationship("HttpMonitorConfig", back_populates="monitor")

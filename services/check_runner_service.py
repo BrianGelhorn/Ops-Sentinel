@@ -29,6 +29,10 @@ def run_monitor_check(monitorid: int):
                 memory_usage_percent=-1,
                 error_message=response.text
             ),
-            resolution=ResolutionCreate()
+            resolution=ResolutionCreate(
+                action_result="TODO",
+                action_taken="TODO",
+                date="TODO"
+            )
         ))
         upload_to_database(incident)
