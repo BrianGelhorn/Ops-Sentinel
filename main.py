@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from routers import health, incidents, ready
-from dbconection import engine, DBaseModel
+from database.dbconection import engine, DBaseModel
 from contextlib import asynccontextmanager
 
 

@@ -1,5 +1,5 @@
-from dbconection import session
-from dbmodels import Incident, Trigger, Evidence, Resolution
+from database.dbconection import session
+from database.dbmodels import Incident, Trigger, Evidence, Resolution
 from schemas.incident import *
 from datetime import datetime, UTC
 from typing import Optional

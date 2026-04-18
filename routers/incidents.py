@@ -1,8 +1,8 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from typing import Optional
 from schemas.incident import *
-from crud import create_incident, upload_to_database, get_all_from_database, get_incidents_from_database, get_from_database
-from dbmodels import Incident
+from database.crud import create_incident, upload_to_database, get_all_from_database, get_incidents_from_database, get_from_database
+from database.dbmodels import Incident
 import logging
 
 
@@ -28,7 +28,7 @@ async def get_all_incidents(
     return allIncidents
 
 @router.get("/{id}", response_model=list[IncidentResponse])
-async def get_incidents(id: int=None):
+async def get_incidents(id: int | None = None):
     allIncidents = get_all_from_database(Incident)
     incidents = list(filter(lambda incident: incident.id == id, allIncidents))
     return incidents
@@ -40,8 +40,12 @@ async def post_incidents(item: IncidentCreate):
     return item
 
 @router.patch("/{id}")
-async def patch_incidents(id: int = None, incidentPatch: IncidentPatch = None):
+async def patch_incidents(id: int, incidentPatch: IncidentPatch):
     incident: Incident = get_from_database(Incident, id)  
+    
+    if incident is None:
+        raise HTTPException(status_code=404, detail="Incident Not Found")
+    
     if incidentPatch.status is not None:
         incident.status = incidentPatch.status
     if incidentPatch.summary is not None:
@@ -56,4 +60,4 @@ async def patch_incidents(id: int = None, incidentPatch: IncidentPatch = None):
         if incidentPatch.resolution.action_result is not None:
             incident.resolution.action_result = incidentPatch.resolution.action_result
     
-    upload_to_database(incident)
+    upload_to_database(incident) 
