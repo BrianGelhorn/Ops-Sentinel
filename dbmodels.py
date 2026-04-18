@@ -54,3 +54,21 @@ class Resolution(DBaseModel):
     incident_id = Column(Integer, ForeignKey("incident.id"), unique=True)
 
     incident = relationship("Incident", back_populates="resolution")
+
+class Monitor(DBaseModel):
+    __tablename__ = "monitor"
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String, nullable=False)
+    interval = Column(Integer, nullable=False)
+    
+    config = relationship("HttpMonitorConfig", back_populates="monitor")
+
+class HttpMonitorConfig(DBaseModel):
+    __tablename__ = "httpmonitorconfig"
+    id = Column(Integer, primary_key=True)
+    host = Column(String, nullable=False)
+    expected_status = Column(Integer, nullable=False)
+    monitor_id = Column(Integer, ForeignKey("monitor.id"), unique=True)
+
+    monitor = relationship("Monitor", back_populates="httpmonitorconfig")

@@ -14,3 +14,4 @@ class MonitorCreate(BaseModel):
 
 class MonitorResponse(MonitorCreate):
     id: int
+
