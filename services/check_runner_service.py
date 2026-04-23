@@ -3,7 +3,7 @@ from schemas.incident import IncidentCreate, TriggerCreate, EvidenceCreate, Reso
 from database.dbmodels import Monitor
 from httpx import get
 
-def run_monitor_check(monitorid: int):
+async def run_monitor_check(monitorid: int):
     monitor = get_from_database(Monitor, monitorid)
     if monitor is None:
         #TODO: Implement incident creation
