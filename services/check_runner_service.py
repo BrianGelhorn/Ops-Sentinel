@@ -33,8 +33,8 @@ async def run_monitor_check(monitorid: int):
                 ),
                 evidence=EvidenceCreate(
                     response_time_in_ms=int(response.elapsed.total_seconds()*1000),
-                    cpu_usage_percent=psutil.cpu_percent(None),
-                    memory_usage_percent=psutil.virtual_memory().percent,
+                    last_cpu_usage_percent=psutil.cpu_percent(None),
+                    last_memory_usage_percent=psutil.virtual_memory().percent,
                     error_message=create_error_message(response, monitor.config.expected_status)
                 ),
                 resolution=ResolutionCreate(
@@ -63,8 +63,8 @@ async def run_monitor_check(monitorid: int):
             ),
             evidence=EvidenceCreate(
                 response_time_in_ms=-1, #TODO
-                cpu_usage_percent=psutil.cpu_percent(None),
-                memory_usage_percent=psutil.virtual_memory().percent,
+                last_cpu_usage_percent=psutil.cpu_percent(None),
+                last_memory_usage_percent=psutil.virtual_memory().percent,
                 error_message=str(e)
             ),
             resolution=ResolutionCreate(
@@ -74,8 +74,6 @@ async def run_monitor_check(monitorid: int):
             )
         ))
         upload_to_database(incident)
-
-
 def create_error_message(response: Response, expected_code: int):
     if response.is_client_error:
         return f"There was an error on the client side. Returned with code: {response.status_code} {response.reason_phrase}"

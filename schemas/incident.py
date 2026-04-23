@@ -9,8 +9,8 @@ class TriggerCreate(BaseModel):
 
 class EvidenceCreate(BaseModel):
     response_time_in_ms: int
-    cpu_usage_percent: float
-    memory_usage_percent: float
+    last_cpu_usage_percent: float
+    last_memory_usage_percent: float
     error_message: str
 
 class ResolutionCreate(BaseModel):
