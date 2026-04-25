@@ -35,6 +35,7 @@ def get_all_from_database(model):
 
 def get_incidents_from_database(                      
                     id: Optional[int] = None,
+                    monitor_id: Optional[int] = None,
                     title: Optional[str] = None,
                     service: Optional[str] = None,
                     type: Optional[str] = None, 
@@ -45,6 +46,9 @@ def get_incidents_from_database(
     if id is not None:
         query = query.filter(Incident.id == id)
     
+    if monitor_id is not None:
+        query = query.filter(Incident.monitor_id == monitor_id)
+
     if title is not None:
         query = query.filter(Incident.title == title)
     

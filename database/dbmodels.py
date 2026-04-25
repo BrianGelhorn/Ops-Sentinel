@@ -7,6 +7,7 @@ class Incident(DBaseModel):
     __tablename__ = "incident"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    monitor_id: Mapped[int] = mapped_column(Integer, ForeignKey("monitor.id"), nullable=True)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
@@ -27,7 +28,7 @@ class Trigger(DBaseModel):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type: Mapped[str] = mapped_column(String, nullable=False)
     expected_status: Mapped[int] = mapped_column(Integer, nullable=False)
-    observed_status: Mapped[int] = mapped_column(Integer, nullable=False)
+    observed_status: Mapped[int] = mapped_column(Integer, nullable=True)
     failed_attempts: Mapped[int] = mapped_column(Integer, nullable=False)
     incident_id: Mapped[int] = mapped_column(Integer, ForeignKey("incident.id"), unique=True)
 
@@ -37,7 +38,7 @@ class Evidence(DBaseModel):
     __tablename__ = "evidence"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    response_time_in_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    response_time_in_ms: Mapped[int] = mapped_column(Integer, nullable=True )
     last_cpu_usage_percent: Mapped[float] = mapped_column(Float, nullable=False)
     last_memory_usage_percent: Mapped[float] = mapped_column(Float, nullable=False)
     error_message: Mapped[str] = mapped_column(String, nullable=False)

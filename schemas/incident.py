@@ -4,11 +4,11 @@ from datetime import datetime
 class TriggerCreate(BaseModel):
     type: str
     expected_status: int
-    observed_status: int
+    observed_status: int | None
     failed_attempts: int
 
 class EvidenceCreate(BaseModel):
-    response_time_in_ms: int
+    response_time_in_ms: int | None
     last_cpu_usage_percent: float
     last_memory_usage_percent: float
     error_message: str
@@ -19,6 +19,7 @@ class ResolutionCreate(BaseModel):
     date: str | None = None
     
 class IncidentCreate(BaseModel):
+    monitor_id: int | None
     title: str
     service: str
     type: str
