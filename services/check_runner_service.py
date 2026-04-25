@@ -61,38 +61,38 @@ async def run_monitor_check(monitorid: int):
                     if inc.monitor_id == monitor.id
                     and inc.trigger.observed_status == response.status_code), None)
     if incident is None:
-        if monitor.config.expected_status != response.status_code:
-            incident = create_incident(IncidentCreate(
-                monitor_id=monitorid,
-                title="Error in get", #TODO
-                service="test-service", #TODO
-                type="http-error", #TODO: Complete
-                severity="medium", #TODO
-                summary="The provided url didnt respond succesfully", #TODO
-                source=f"{monitor.config.url}",
-                trigger=TriggerCreate(
-                    type="TODO", #TODO
-                    expected_status=monitor.config.expected_status,
-                    observed_status=response.status_code,
-                    failed_attempts=1 #TODO
-                ),
-                evidence=EvidenceCreate(
-                    response_time_in_ms=int(response.elapsed.total_seconds()*1000), #TODO
-                    last_cpu_usage_percent=psutil.cpu_percent(None),
-                    last_memory_usage_percent=psutil.virtual_memory().percent,
-                    error_message=create_error_message(response, monitor.config.expected_status)
-                ),
-                resolution=ResolutionCreate(
-                    action_result="TODO", #TODO
-                    action_taken="TODO", #TODO
-                    date="TODO" #TODO
-                )
-            ))
+        incident = create_incident(IncidentCreate(
+            monitor_id=monitorid,
+            title="Error in get", #TODO
+            service="test-service", #TODO
+            type="http-error", #TODO: Complete
+            severity="medium", #TODO
+            summary="The provided url didnt respond succesfully", #TODO
+            source=f"{monitor.config.url}",
+            trigger=TriggerCreate(
+                type="TODO", #TODO
+                expected_status=monitor.config.expected_status,
+                observed_status=response.status_code,
+                failed_attempts=1 #TODO
+            ),
+            evidence=EvidenceCreate(
+                response_time_in_ms=int(response.elapsed.total_seconds()*1000), #TODO
+                last_cpu_usage_percent=psutil.cpu_percent(None),
+                last_memory_usage_percent=psutil.virtual_memory().percent,
+                error_message=create_error_message(response, monitor.config.expected_status)
+            ),
+            resolution=ResolutionCreate(
+                action_result="TODO", #TODO
+                action_taken="TODO", #TODO
+                date="TODO" #TODO
+            )
+        ))
     else:
         incident.trigger.failed_attempts += 1
         incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
         incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
-    upload_to_database(incident)
+    if monitor.config.expected_status != response.status_code:
+        upload_to_database(incident)
 
 def create_error_message(response: Response | None, expected_code: int):
     if response.is_client_error:
