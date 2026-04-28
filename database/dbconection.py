@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
 POSTGRES_USER=os.getenv("POSTGRES_USER", "postgres")
@@ -10,6 +9,12 @@ PORT=5432
 engine = create_engine(f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@db:{PORT}/{POSTGRES_DB}")
 
 Session = sessionmaker(bind=engine)
-session = Session()
 
 DBaseModel = declarative_base()
+
+def get_db():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()

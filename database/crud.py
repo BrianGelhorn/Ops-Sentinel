@@ -1,4 +1,6 @@
-from database.dbconection import session
+from database.dbconection import get_db
+from sqlalchemy.orm import Session
+from fastapi import Depends
 from database.dbmodels import Incident, Trigger, Evidence, Resolution
 from schemas.incident import *
 from datetime import datetime, UTC
@@ -20,18 +22,18 @@ def create_incident(item: IncidentCreate) -> Incident:
     
     return incident
 
-def upload_to_database(item):
-    session.add(item)
-    session.commit()
-    session.refresh(item)
+def upload_to_database(item, db: Session):
+    db.add(item)
+    db.commit()
+    db.refresh(item)
 
-def get_from_database(model, id):
-    return session.get(model, id)
+def get_from_database(model, id, db: Session):
+    return db.get(model, id)
 
 
 
-def get_all_from_database(model):
-    return session.query(model).all()
+def get_all_from_database(model, db: Session):
+    return db.query(model).all()
 
 def get_incidents_from_database(                      
                     id: Optional[int] = None,
@@ -40,8 +42,9 @@ def get_incidents_from_database(
                     service: Optional[str] = None,
                     type: Optional[str] = None, 
                     severity: Optional[str] = None,
-                    source: Optional[str] = None):
-    query = session.query(Incident)
+                    source: Optional[str] = None,
+                    db: Session = Depends(get_db)):
+    query = db.query(Incident)
 
     if id is not None:
         query = query.filter(Incident.id == id)

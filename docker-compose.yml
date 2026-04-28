@@ -34,6 +34,22 @@ services:
       timeout: 3s
       retries: 5
       start_period: 3s
+  db_test:
+    image: postgres:18
+    ports:
+      - "${DB_PORT}:5432"
+    volumes: 
+      - incidents-database:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_TEST}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB_TEST}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
 
 volumes:
   incidents-database:
