@@ -1,4 +1,4 @@
-from database.crud import get_from_database, upload_to_database, create_incident, get_incidents_from_database
+from database.crud import get_from_database, upload_to_database, create_incident, get_incidents_from_database, Session
 from schemas.incident import IncidentCreate, TriggerCreate, EvidenceCreate, ResolutionCreate
 from database.dbmodels import Monitor, Incident
 from httpx import get, Response, codes, AsyncClient, RequestError
@@ -6,11 +6,12 @@ import asyncio
 import psutil
 
 async def run_monitor_check(monitorid: int):
+    db=Session()
     #Call to avoid 0% display
     psutil.cpu_percent(None)
     await asyncio.sleep(1)
-    monitor = get_from_database(Monitor, monitorid)
-    response: Response = None
+    monitor = get_from_database(Monitor, monitorid, db)
+    response: Response | None = None
     other_incidents = get_incidents_from_database(monitor_id=monitorid)
 
     if monitor is None:
@@ -55,7 +56,7 @@ async def run_monitor_check(monitorid: int):
             incident.trigger.failed_attempts += 1
             incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
             incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
-        upload_to_database(incident)
+        upload_to_database(incident, db)
         return 
     incident: Incident = next((inc for inc in other_incidents 
                     if inc.monitor_id == monitor.id
@@ -92,14 +93,16 @@ async def run_monitor_check(monitorid: int):
         incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
         incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
     if monitor.config.expected_status != response.status_code:
-        upload_to_database(incident)
+        upload_to_database(incident, db)
 
 def create_error_message(response: Response | None, expected_code: int):
-    if response.is_client_error:
-        return f"There was an error on the client side. Returned with code: {response.status_code} {response.reason_phrase}"
-    elif response.is_server_error:
-        return f"There was an error on the server side. Returned with code: {response.status_code} {response.reason_phrase}"
-    else:
-        return f"The server is alive but the expected code {expected_code} did not match the expected code {response.status_code} {response.reason_phrase}"
+    if response is not None:
+        if response.is_client_error:
+            return f"There was an error on the client side. Returned with code: {response.status_code} {response.reason_phrase}"
+        elif response.is_server_error:
+            return f"There was an error on the server side. Returned with code: {response.status_code} {response.reason_phrase}"
+        else:
+            return f"The server is alive but the expected code {expected_code} did not match the expected code {response.status_code} {response.reason_phrase}"
+    return "Uknown Error"
     
     
