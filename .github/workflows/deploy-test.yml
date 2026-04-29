@@ -11,11 +11,13 @@ env:
 jobs:
   deploy-test:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
+
     steps:
 
       - name: Checkout repository
@@ -40,12 +42,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: steps.metadata.outputs.tags
-          labels: steps.metadata.outputs.labels
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
 
       - name: Generate artifact attestation
         uses: actions/attest@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.push.outputs }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
