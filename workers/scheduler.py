@@ -18,12 +18,14 @@ async def run_scheduler_loop():
 def should_run() -> list[Monitor]:
     db = Session()
     monitors: list[Monitor] = get_all_from_database(Monitor, db)
+    now = datetime.now()
     return list(
         filter(
-            lambda monitor: monitor.last_checked_at 
-            is None 
-            or (datetime.now() - monitor.last_checked_at).total_seconds() > monitor.interval_seconds, monitors
-            ))
+            lambda monitor: 
+            monitor.last_checked_at is None 
+            or(
+            (now - monitor.last_checked_at).total_seconds() > monitor.interval_seconds), 
+            monitors))
 
     
 def start_scheduler_loop():

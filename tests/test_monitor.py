@@ -12,10 +12,10 @@ POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_DB_TEST = os.getenv("POSTGRES_DB_TEST", f"{POSTGRES_USER}_TEST")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 PORT = 5436
-#Create the app with the testing param
+# Create the app with the testing param
 app = create_app(testing=True)
 client = TestClient(app)
-#Create a new engine with a test database
+# Create a new engine with a test database
 engine = create_engine(f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
                        f"@localhost:{PORT}/{POSTGRES_DB_TEST}")
 Session = sessionmaker(bind=engine)
@@ -30,7 +30,7 @@ def get_db_override():
     finally:
         db.close()
 
-        
+
 app.dependency_overrides[get_db] = get_db_override
 
 
@@ -42,12 +42,13 @@ def test_check_if_healthy():
 
 def test_post_monitor():
     monitor_to_post = {  
-    "title": "testPost",
-    "type": "http",
-    "interval_seconds": 5,
-    "config": {
-        "url": "https://www.google.com.ar",
-        "expected_status": 202
-  }}
+        "title": "testPost",
+        "type": "http",
+        "interval_seconds": 5,
+        "config": {
+            "url": "https://www.google.com.ar",
+            "expected_status": 202
+        }
+    }
     response = client.post("/monitor/", json=monitor_to_post)
     assert response.status_code == 200

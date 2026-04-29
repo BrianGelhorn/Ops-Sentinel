@@ -1,5 +1,12 @@
-from database.crud import get_from_database, upload_to_database, create_incident, get_incidents_from_database, Session
-from schemas.incident import IncidentCreate, TriggerCreate, EvidenceCreate, ResolutionCreate
+from database.crud import (get_from_database, 
+                           upload_to_database, 
+                           create_incident, 
+                           get_incidents_from_database, 
+                           Session)
+from schemas.incident import (IncidentCreate, 
+                              TriggerCreate, 
+                              EvidenceCreate, 
+                              ResolutionCreate)
 from database.dbmodels import Monitor, Incident
 from httpx import get, Response, codes, AsyncClient, RequestError
 import asyncio
@@ -23,9 +30,10 @@ async def run_monitor_check(monitorid: int):
             response = await client.get(monitor.config.url)
 
     except RequestError as e:
-        incident: Incident = next((inc for inc in other_incidents 
-                if inc.monitor_id == monitor.id
-                and inc.trigger.observed_status is None), None)
+        incident: Incident = next((inc 
+                                   for inc in other_incidents 
+                                   if inc.monitor_id == monitor.id and inc.trigger.observed_status is None),
+                                   None)
         if incident is None:
             incident = create_incident(IncidentCreate(
                 monitor_id=monitorid,
@@ -42,7 +50,9 @@ async def run_monitor_check(monitorid: int):
                     failed_attempts=1  # TODO
                 ),
                 evidence = EvidenceCreate(
-                    response_time_in_ms=None if response is None else int(response.elapsed.total_seconds()*1000),  # TODO
+                    response_time_in_ms=(int(response.elapsed.total_seconds()*1000)
+                                         if response is not None 
+                                         else None),  # TODO
                     last_cpu_usage_percent=psutil.cpu_percent(None),
                     last_memory_usage_percent=psutil.virtual_memory().percent,
                     error_message=str(e)

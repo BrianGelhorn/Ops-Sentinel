@@ -59,9 +59,13 @@ class Evidence(DBaseModel):
     __tablename__ = "evidence"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    response_time_in_ms: Mapped[int] = mapped_column(Integer, nullable=True )
-    last_cpu_usage_percent: Mapped[float] = mapped_column(Float, nullable=False)
-    last_memory_usage_percent: Mapped[float] = mapped_column(Float, nullable=False)
+    response_time_in_ms: Mapped[int] = mapped_column(Integer, nullable=True)
+    last_cpu_usage_percent: Mapped[float] = mapped_column(
+        Float, 
+        nullable=False)
+    last_memory_usage_percent: Mapped[float] = mapped_column(
+        Float, 
+        nullable=False)
     error_message: Mapped[str] = mapped_column(String, nullable=False)
     incident_id: Mapped[int] = mapped_column(
         Integer, 
