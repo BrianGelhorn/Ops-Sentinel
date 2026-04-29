@@ -19,8 +19,8 @@ jobs:
                 options: >-
                     --health-cmd="pg_isready -U test_user -d ops_sentinel_test"
                     --health-interval=5s
-                    --health-timeout: 3s
-                    --health-retries: 5
+                    --health-timeout=3s
+                    --health-retries=5
         env:
             DB_PORT_TEST: 5435
             POSTGRES_DB_TEST: Ops_Sentinel_DB_Test
