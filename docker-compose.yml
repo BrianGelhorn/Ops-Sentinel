@@ -1,7 +1,6 @@
 services:
   api:
-    image: ghcr.io/briangelhorn/ops-sentinel:latest
-      - "${APP_PORT}:8000"
+    image: ghcr.io/briangelhorn/ops-sentinel:dev
     develop:
       watch:
         - action: sync+restart
