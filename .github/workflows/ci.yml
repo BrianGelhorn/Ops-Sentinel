@@ -22,7 +22,7 @@ jobs:
                     --health-timeout=3s
                     --health-retries=5
         env:
-            DB_PORT_TEST: 5435
+            DB_PORT_TEST: 5432
             POSTGRES_DB_TEST: Ops_Sentinel_DB_Test
             POSTGRES_USER: opssentinel
             POSTGRES_PASSWORD: testPassword

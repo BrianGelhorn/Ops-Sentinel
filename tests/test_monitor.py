@@ -11,7 +11,7 @@ load_dotenv()
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_DB_TEST = os.getenv("POSTGRES_DB_TEST", f"{POSTGRES_USER}_TEST")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-PORT = 5436
+PORT = os.getenv("DB_PORT_TEST", 5436)
 # Create the app with the testing param
 app = create_app(testing=True)
 client = TestClient(app)
