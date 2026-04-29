@@ -31,9 +31,9 @@ async def run_monitor_check(monitorid: int):
 
     except RequestError as e:
         incident: Incident = next((inc 
-                                for inc in other_incidents 
-                                if inc.monitor_id == monitor.id and inc.trigger.observed_status is None),
-                                None)
+                                   for inc in other_incidents 
+                                   if inc.monitor_id == monitor.id and inc.trigger.observed_status is None),
+                                   None)
         if incident is None:
             incident = create_incident(IncidentCreate(
                 monitor_id=monitorid,
@@ -46,11 +46,11 @@ async def run_monitor_check(monitorid: int):
                 trigger=TriggerCreate(
                     type="TODO",  # TODO
                     expected_status=monitor.config.expected_status,
-                    observed_status=None if response is None else response.status_code,  # noqa: E501
+                    observed_status=None if response is None else response.status_code,
                     failed_attempts=1  # TODO
                 ),
                 evidence=EvidenceCreate(
-                    response_time_in_ms=(int(response.elapsed.total_seconds()*1000)  # noqa: E501
+                    response_time_in_ms=(int(response.elapsed.total_seconds() * 1000)
                                          if response is not None 
                                          else None),  # TODO
                     last_cpu_usage_percent=psutil.cpu_percent(None),
@@ -88,7 +88,7 @@ async def run_monitor_check(monitorid: int):
                 failed_attempts=1  # TODO
             ),
             evidence=EvidenceCreate(
-                response_time_in_ms=int(response.elapsed.total_seconds()*1000),  # TODO
+                response_time_in_ms=int(response.elapsed.total_seconds() * 1000),  # TODO
                 last_cpu_usage_percent=psutil.cpu_percent(None),
                 last_memory_usage_percent=psutil.virtual_memory().percent,
                 error_message=create_error_message(response, monitor.config.expected_status)
@@ -102,7 +102,7 @@ async def run_monitor_check(monitorid: int):
     else:
         incident.trigger.failed_attempts += 1
         incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
-        incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent # noqa: E501
+        incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
     if monitor.config.expected_status != response.status_code:
         upload_to_database(incident, db)
 
@@ -117,7 +117,8 @@ def create_error_message(response: Response | None, expected_code: int):
                     f"Returned with code: {response.status_code} {response.reason_phrase}")
         else:
             return (f"The server is alive but the expected code {expected_code} "
-                    f"did not match the expected code {response.status_code} {response.reason_phrase}")
+                    f"did not match the expected code {response.status_code} "
+                    f"{response.reason_phrase}")
     return "Uknown Error"
     
     

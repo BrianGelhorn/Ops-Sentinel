@@ -24,7 +24,7 @@ def should_run() -> list[Monitor]:
             lambda monitor: 
             monitor.last_checked_at is None 
             or (
-                (now - monitor.last_checked_at).total_seconds() > monitor.interval_seconds), # noqa: E501
+                (now - monitor.last_checked_at).total_seconds() > monitor.interval_seconds),
                 monitors))
 
     

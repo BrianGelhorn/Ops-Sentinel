@@ -28,14 +28,14 @@ async def get_all_incidents(
     source: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-        allIncidents = get_incidents_from_database(id=id,
-                                                   title=title,
-                                                   service=service,
-                                                   type=type,
-                                                   severity=severity,
-                                                   source=source,
-                                                   db=db)
-        return allIncidents
+    allIncidents = get_incidents_from_database(id=id,
+                                                title=title,
+                                                service=service,
+                                                type=type,
+                                                severity=severity,
+                                                source=source,
+                                                db=db)
+    return allIncidents
 
 
 @router.get("/{id}", response_model=list[IncidentResponse])
@@ -79,10 +79,10 @@ async def patch_incidents(
         incident.severity = incidentPatch.severity
     if incidentPatch.resolution is not None:
         if incidentPatch.resolution.action_taken is not None:
-            incident.resolution.action_taken = incidentPatch.resolution.action_taken  # noqa: E501 
+            incident.resolution.action_taken = incidentPatch.resolution.action_taken
         if incidentPatch.resolution.date is not None:
             incident.resolution.date = incidentPatch.resolution.date
         if incidentPatch.resolution.action_result is not None:
-            incident.resolution.action_result = incidentPatch.resolution.action_result  # noqa: E501
+            incident.resolution.action_result = incidentPatch.resolution.action_result
     
     upload_to_database(incident, db) 
