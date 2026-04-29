@@ -3,7 +3,6 @@ from routers import health, incidents, ready, monitors
 from database.dbconection import engine, DBaseModel
 from contextlib import asynccontextmanager
 from workers.scheduler import start_scheduler_loop
-import asyncio
 
 
 def create_app(testing: bool =False):
