@@ -1,0 +1,45 @@
+name: CI Ops Sentinel
+
+on:
+    push:
+
+        
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+        services:
+            db_test:
+                image: postgres:18
+                ports:
+                - 5432:5432
+                env:
+                    POSTGRES_DB: ops_sentinel_test
+                    POSTGRES_USER: test_user
+                    POSTGRES_PASSWORD: test_password
+                options: >-
+                    --health-cmd="pg_isready -U test_user -d ops_sentinel_test"
+                    --health-interval=5s
+                    --health-timeout: 3s
+                    --health-retries: 5
+        env:
+            DB_PORT_TEST: 5435
+            POSTGRES_DB_TEST: Ops_Sentinel_DB_Test
+            POSTGRES_USER: opssentinel
+            POSTGRES_PASSWORD: testPassword
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v6
+
+            - name: Set Up Python
+              uses: actions/setup-python@v6
+              with:
+                python-version: 3.13
+
+            - name: Install dependencies
+              run: pip install -r requirements.txt pytest flake8
+
+            - name: Lint with Flake8
+              run: flake8 . --count --select=E,F63,F7,F82 --max-line-length=100
+
+            - name: Run python tests
+              run: python -m pytest

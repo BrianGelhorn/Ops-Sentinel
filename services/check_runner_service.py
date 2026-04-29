@@ -8,7 +8,7 @@ from schemas.incident import (IncidentCreate,
                               EvidenceCreate, 
                               ResolutionCreate)
 from database.dbmodels import Monitor, Incident
-from httpx import get, Response, codes, AsyncClient, RequestError
+from httpx import Response, AsyncClient, RequestError
 import asyncio
 import psutil
 
