@@ -7,25 +7,29 @@ from datetime import datetime
 
 taskScheduler: asyncio.Task | None = None
 
+
 async def run_scheduler_loop():
     while True:
         for monitor in should_run():
             asyncio.Task(run_monitor_check(monitor.id))
         await asyncio.sleep(5)
 
+
 def should_run() -> list[Monitor]:
     db = Session()
-    monitors : list[Monitor] = get_all_from_database(Monitor, db)
+    monitors: list[Monitor] = get_all_from_database(Monitor, db)
     return list(
         filter(
-            lambda monitor: monitor.last_checked_at is None or (datetime.now() - monitor.last_checked_at).total_seconds() > monitor.interval_seconds, monitors
+            lambda monitor: monitor.last_checked_at 
+            is None 
+            or (datetime.now() - monitor.last_checked_at).total_seconds() > monitor.interval_seconds, monitors
             ))
 
     
-
 def start_scheduler_loop():
     global taskScheduler
     taskScheduler = asyncio.Task(run_scheduler_loop())
+
 
 def stop_scheduler_loop():
     global taskScheduler

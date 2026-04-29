@@ -6,6 +6,7 @@ from schemas.incident import *
 from datetime import datetime, UTC
 from typing import Optional
 
+
 def create_incident(item: IncidentCreate) -> Incident:
     itemData = item.model_dump(exclude={"trigger", "evidence", "resolution"})
 
@@ -22,28 +23,30 @@ def create_incident(item: IncidentCreate) -> Incident:
     
     return incident
 
+
 def upload_to_database(item, db: Session):
     db.add(item)
     db.commit()
     db.refresh(item)
 
+
 def get_from_database(model, id, db: Session):
     return db.get(model, id)
-
 
 
 def get_all_from_database(model, db: Session):
     return db.query(model).all()
 
-def get_incidents_from_database(                      
-                    id: Optional[int] = None,
-                    monitor_id: Optional[int] = None,
-                    title: Optional[str] = None,
-                    service: Optional[str] = None,
-                    type: Optional[str] = None, 
-                    severity: Optional[str] = None,
-                    source: Optional[str] = None,
-                    db: Session = Depends(get_db)):
+
+def get_incidents_from_database(
+        id: Optional[int] = None,
+        monitor_id: Optional[int] = None,
+        title: Optional[str] = None,
+        service: Optional[str] = None,
+        type: Optional[str] = None, 
+        severity: Optional[str] = None,
+        source: Optional[str] = None,
+        db: Session = Depends(get_db)):
     query = db.query(Incident)
 
     if id is not None:

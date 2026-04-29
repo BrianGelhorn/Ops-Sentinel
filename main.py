@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from workers.scheduler import start_scheduler_loop
 
 
-def create_app(testing: bool =False):
+def create_app(testing: bool = False):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if not testing:
@@ -19,5 +19,6 @@ def create_app(testing: bool =False):
     app.include_router(ready.router)
     app.include_router(monitors.router)
     return app
-    
+
+
 app = create_app()
