@@ -5,7 +5,7 @@ from services.check_runner_service import run_monitor_check
 import asyncio
 from datetime import datetime
 
-taskScheduler: asyncio.Task
+taskScheduler: asyncio.Task | None = None
 
 async def run_scheduler_loop():
     while True:
@@ -29,5 +29,5 @@ def start_scheduler_loop():
 
 def stop_scheduler_loop():
     global taskScheduler
-    taskScheduler.get_loop().call_soon_threadsafe(taskScheduler.cancel)
-    pass
+    if taskScheduler is not None:
+        taskScheduler.get_loop().call_soon_threadsafe(taskScheduler.cancel)
