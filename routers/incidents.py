@@ -29,12 +29,12 @@ async def get_all_incidents(
     db: Session = Depends(get_db)
 ):
     allIncidents = get_incidents_from_database(id=id,
-                                                title=title,
-                                                service=service,
-                                                type=type,
-                                                severity=severity,
-                                                source=source,
-                                                db=db)
+                                               title=title,
+                                               service=service,
+                                               type=type,
+                                               severity=severity,
+                                               source=source,
+                                               db=db)
     return allIncidents
 
 
