@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   deploy-test:
@@ -19,6 +18,9 @@ jobs:
       id-token: write
 
     steps:
+      
+      - name: Set image name in lowercase
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,} >> $GITHUB_ENV"
 
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -51,3 +53,5 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      - name: 

@@ -1,7 +1,6 @@
 services:
   api:
-    build: .
-    ports: 
+    image: ghcr.io/briangelhorn/ops-sentinel:latest
       - "${APP_PORT}:8000"
     develop:
       watch:
