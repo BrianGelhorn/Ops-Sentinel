@@ -4,6 +4,8 @@ from main import create_app
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from database.dbconection import get_db, DBaseModel
+from database.crud import get_all_from_database
+from database.dbmodels import Monitor
 import os
 from dotenv import load_dotenv
 
@@ -51,4 +53,6 @@ def test_post_monitor():
         }
     }
     response = client.post("/monitor/", json=monitor_to_post)
+    database: list[Monitor] = get_all_from_database(Monitor, Session)
     assert response.status_code == 200
+    assert any(monitor.id == response.json().get("id") for monitor in database)

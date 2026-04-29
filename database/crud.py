@@ -4,7 +4,7 @@ from fastapi import Depends
 from database.dbmodels import Incident, Trigger, Evidence, Resolution
 from schemas.incident import *
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Optional, TypeVar, Type
 
 
 def create_incident(item: IncidentCreate) -> Incident:
@@ -33,8 +33,9 @@ def upload_to_database(item, db: Session):
 def get_from_database(model, id, db: Session):
     return db.get(model, id)
 
+ModelType = TypeVar("ModelType")
 
-def get_all_from_database(model, db: Session):
+def get_all_from_database(model: Type[ModelType], db: Session) -> list[ModelType]:
     return db.query(model).all()
 
 
