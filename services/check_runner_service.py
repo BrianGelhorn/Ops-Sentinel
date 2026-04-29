@@ -30,11 +30,14 @@ async def run_monitor_check(monitorid: int):
             response = await client.get(monitor.config.url)
 
     except RequestError as e:
-        incident: Incident = next((inc 
-                                   for inc in other_incidents 
-                                   if (inc.monitor_id == monitor.id 
-                                       and inc.trigger.observed_status is None)
-                                       ), None)
+        incident: Incident = next(
+                                (
+                                    inc 
+                                    for inc in other_incidents 
+                                    if inc.monitor_id == monitor.id 
+                                    and inc.trigger.observed_status is None
+                                ), 
+                                None)
         if incident is None:
             incident = create_incident(IncidentCreate(
                 monitor_id=monitorid,
