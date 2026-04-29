@@ -31,3 +31,4 @@ def stop_scheduler_loop():
     global taskScheduler
     if taskScheduler is not None:
         taskScheduler.get_loop().call_soon_threadsafe(taskScheduler.cancel)
+        taskScheduler = None
