@@ -14,7 +14,7 @@ import psutil
 
 
 async def run_monitor_check(monitorid: int):
-    db=Session()
+    db = Session()
     # Call to avoid 0% display
     psutil.cpu_percent(None)
     await asyncio.sleep(1)
@@ -31,9 +31,9 @@ async def run_monitor_check(monitorid: int):
 
     except RequestError as e:
         incident: Incident = next((inc 
-                                   for inc in other_incidents 
-                                   if inc.monitor_id == monitor.id and inc.trigger.observed_status is None),
-                                   None)
+                                for inc in other_incidents 
+                                if inc.monitor_id == monitor.id and inc.trigger.observed_status is None),
+                                None)
         if incident is None:
             incident = create_incident(IncidentCreate(
                 monitor_id=monitorid,
@@ -43,21 +43,21 @@ async def run_monitor_check(monitorid: int):
                 severity="medium",  # TODO
                 summary="The provided url didnt respond succesfully",  # TODO
                 source=f"{monitor.config.url}",
-                trigger = TriggerCreate(
+                trigger=TriggerCreate(
                     type="TODO",  # TODO
                     expected_status=monitor.config.expected_status,
-                    observed_status=None if response is None else response.status_code,
+                    observed_status=None if response is None else response.status_code,  # noqa: E501
                     failed_attempts=1  # TODO
                 ),
-                evidence = EvidenceCreate(
-                    response_time_in_ms=(int(response.elapsed.total_seconds()*1000)
+                evidence=EvidenceCreate(
+                    response_time_in_ms=(int(response.elapsed.total_seconds()*1000)  # noqa: E501
                                          if response is not None 
                                          else None),  # TODO
                     last_cpu_usage_percent=psutil.cpu_percent(None),
                     last_memory_usage_percent=psutil.virtual_memory().percent,
                     error_message=str(e)
                 ),
-                resolution = ResolutionCreate(
+                resolution=ResolutionCreate(
                     action_result="TODO",  # TODO
                     action_taken="TODO",  # TODO
                     date="TODO"  # TODO
@@ -79,21 +79,21 @@ async def run_monitor_check(monitorid: int):
             service="test-service",  # TODO
             type="http-error",  # TODO: Complete
             severity="medium",  # TODO
-            summary="The provided url didnt respond succesfully",  #TODO
+            summary="The provided url didnt respond succesfully",  # TODO
             source=f"{monitor.config.url}",
-            trigger = TriggerCreate(
+            trigger=TriggerCreate(
                 type="TODO",  # TODO
                 expected_status=monitor.config.expected_status,
                 observed_status=response.status_code,
                 failed_attempts=1  # TODO
             ),
-            evidence = EvidenceCreate(
+            evidence=EvidenceCreate(
                 response_time_in_ms=int(response.elapsed.total_seconds()*1000),  # TODO
                 last_cpu_usage_percent=psutil.cpu_percent(None),
                 last_memory_usage_percent=psutil.virtual_memory().percent,
                 error_message=create_error_message(response, monitor.config.expected_status)
             ),
-            resolution = ResolutionCreate(
+            resolution=ResolutionCreate(
                 action_result="TODO",  # TODO
                 action_taken="TODO",  # TODO
                 date="TODO"  # TODO
@@ -102,7 +102,7 @@ async def run_monitor_check(monitorid: int):
     else:
         incident.trigger.failed_attempts += 1
         incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
-        incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
+        incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent # noqa: E501
     if monitor.config.expected_status != response.status_code:
         upload_to_database(incident, db)
 
