@@ -33,7 +33,9 @@ def upload_to_database(item, db: Session):
 def get_from_database(model, id, db: Session):
     return db.get(model, id)
 
+
 ModelType = TypeVar("ModelType")
+
 
 def get_all_from_database(model: Type[ModelType], db: Session) -> list[ModelType]:
     return db.query(model).all()
