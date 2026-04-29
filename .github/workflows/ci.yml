@@ -23,9 +23,9 @@ jobs:
                     --health-retries=5
         env:
             DB_PORT_TEST: 5432
-            POSTGRES_DB_TEST: Ops_Sentinel_DB_Test
-            POSTGRES_USER: opssentinel
-            POSTGRES_PASSWORD: testPassword
+            POSTGRES_DB_TEST: ops_sentinel_test
+            POSTGRES_USER: test_user
+            POSTGRES_PASSWORD: test_password
         steps:
             - name: Checkout Code
               uses: actions/checkout@v6
