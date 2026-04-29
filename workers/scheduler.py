@@ -24,8 +24,10 @@ def should_run() -> list[Monitor]:
     
 
 def start_scheduler_loop():
+    global taskScheduler
     taskScheduler = asyncio.Task(run_scheduler_loop())
 
 def stop_scheduler_loop():
+    global taskScheduler
     taskScheduler.get_loop().call_soon_threadsafe(taskScheduler.cancel)
     pass
