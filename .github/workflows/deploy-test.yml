@@ -64,5 +64,5 @@ jobs:
           script: |
             git clone "https://github.com/${{ github.repository }}.git"
             cd "$(basename ${{ github.repository }})"
-            docker pull "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+            docker pull "ghcr.io/${{ env.IMAGE_NAME }}"
             docker compose up -d
