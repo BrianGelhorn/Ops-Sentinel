@@ -68,7 +68,7 @@ jobs:
             POSTGRES_DB=${{ vars.POSTGRES_DB }}
             POSTGRES_DB_TEST=${{ vars.POSTGRES_DB_TEST }}
             POSTGRES_USER=${{ vars.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_TEST }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             APP_PORT=${{ vars.APP_PORT }}
             DB_PORT=${{ vars.DB_PORT }}
             DB_PORT_TEST=${{ vars.DB_PORT_TEST }}
