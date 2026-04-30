@@ -78,3 +78,21 @@ jobs:
             EOF
             sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:dev
             sudo docker compose up --build -d
+
+  test-api:
+    needs: deploy-test
+    runs-on: ubuntu-latest
+
+    steps:
+      
+      - name: Get health of api
+        run: |
+          RESPONSE=curl -vX 'GET' ${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/health
+          STATUS = $(echo $RESPONSE | jq -r ".status")
+          if [ $RESPONSE != "alive"]; then
+            echo "API is not alive"
+            exit 1
+          fi
+
+          echo "API is alive"
+
