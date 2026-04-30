@@ -1,6 +1,7 @@
 venv/
 .env
 __pycache__/
+.pytest_cache/
 routers/__pycache__/
 tests/__pycache__
 .pytest_cache
