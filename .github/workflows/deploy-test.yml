@@ -85,11 +85,11 @@ jobs:
 
     steps:
       
-      - name: Get health of api
+      - name: Check if API is alive
         run: |
-          RESPONSE=$(curl -vX 'GET' ${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/health)
+          RESPONSE=$(curl -X 'GET' ${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/health)
           STATUS=$(echo $RESPONSE | jq -r ".status")
-          if [ $RESPONSE != "alive"]; then
+          if [ $STATUS != "alive"]; then
             echo "API is not alive"
             exit 1
           fi
