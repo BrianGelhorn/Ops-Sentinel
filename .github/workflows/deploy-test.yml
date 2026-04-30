@@ -77,7 +77,7 @@ jobs:
             DB_PORT_TEST=${{ vars.DB_PORT_TEST }}
             EOF
             sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:dev
-            sudo docker compose up --build -d
+            sudo docker compose up -d
 
   test-api:
     needs: deploy-test
