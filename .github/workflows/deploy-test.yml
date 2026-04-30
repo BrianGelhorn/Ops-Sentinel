@@ -62,8 +62,11 @@ jobs:
           username: ${{ secrets.SSH_USERNAME_TEST }}
           key: ${{ secrets.SSH_PRIVATE_KEY_TEST }}
           script: |
-            git clone "https://github.com/${{ github.repository }}.git"
+            if [ ! -d ./Ops-Sentinel/.git ]; then
+              git clone https://github.com/${{ github.repository }}.git Ops-Sentinel
+            fi
             cd "$(basename ${{ github.repository }})"
+            git pull origin dev
             cat > .env << EOF
             POSTGRES_DB=${{ vars.POSTGRES_DB }}
             POSTGRES_DB_TEST=${{ vars.POSTGRES_DB_TEST }}
