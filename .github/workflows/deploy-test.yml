@@ -65,7 +65,7 @@ jobs:
             if [ ! -d ./Ops-Sentinel/.git ]; then
               git clone https://github.com/${{ github.repository }}.git Ops-Sentinel
             fi
-            cd "$(basename ${{ github.repository }})"
+            cd "./Ops-Sentinel"
             git pull origin dev
             cat > .env << EOF
             POSTGRES_DB=${{ vars.POSTGRES_DB }}
