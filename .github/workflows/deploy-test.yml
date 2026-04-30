@@ -58,9 +58,9 @@ jobs:
       - name: Connect to SSH server
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.SECRET_SSH_HOST_TEST }}
-          username: ${{ secrets.SECRET_SSH_USERNAME_TEST }}
-          key: ${{ secrets.SECRET_SSH_PRIVATE_KEY_TEST }}
+          host: ${{ secrets.SSH_HOST_TEST }}
+          username: ${{ secrets.SSH_USERNAME_TEST }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_TEST }}
           script:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             docker compose up -d
