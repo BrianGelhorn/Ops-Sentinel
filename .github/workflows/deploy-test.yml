@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME_TEST }}
           key: ${{ secrets.SSH_PRIVATE_KEY_TEST }}
           script:
-            git clone https://github.com/${{ github.repository }}.git
-            cd ${{ github.repository }}
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            git clone "https://github.com/${{ github.repository }}.git"
+            cd "${{ github.repository }}"
+            docker pull "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
             docker compose up -d
