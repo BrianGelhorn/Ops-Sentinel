@@ -56,7 +56,7 @@ jobs:
           push-to-registry: true
       
       - name: Connect to SSH server
-        uses: apple-boy/ssh-action@v1
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SECRET_SSH_HOST_TEST }}
           username: ${{ secrets.SECRET_SSH_USERNAME_TEST }}
