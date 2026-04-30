@@ -64,5 +64,14 @@ jobs:
           script: |
             git clone "https://github.com/${{ github.repository }}.git"
             cd "$(basename ${{ github.repository }})"
+            cat > .env << EOF
+            POSTGRES_DB=${{ vars.POSTGRES_DB }}
+            POSTGRES_DB_TEST=${{ vars.POSTGRES_DB_TEST }}
+            POSTGRES_USER=${{ vars.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_TEST }}
+            APP_PORT=${{ vars.APP_PORT }}
+            DB_PORT=${{ vars.DB_PORT }}
+            DB_PORT_TEST=${{ vars.DB_PORT_TEST }}
+            EOF
             sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:dev
             sudo docker compose up --build -d
