@@ -49,6 +49,7 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
 
       - name: Generate artifact attestation
+        if: ${{ !env.ACT }}
         uses: actions/attest@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -95,4 +96,3 @@ jobs:
           fi
 
           echo "API is alive"
-

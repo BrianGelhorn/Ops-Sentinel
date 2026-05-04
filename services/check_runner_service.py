@@ -27,6 +27,9 @@ REQUEST_ERROR_SEVERITY = {
     "protocol-error": "medium",
     "redirect-error": "low",
     "request-error": "medium",
+    "client-error": "medium",
+    "server-error": "high",
+    "unexpected-status-error": "medium",
 }
 
 
@@ -94,7 +97,7 @@ async def run_monitor_check(monitorid: int):
 
         except RequestError as e:
             request_error = e
-        incident_type: str = "Unknown type"
+        incident_type: str = "Unknown"
         if request_error is not None:
             incident_type = classify_request_error(request_error)
         if response is not None:
@@ -102,13 +105,14 @@ async def run_monitor_check(monitorid: int):
                 response=response,
                 expected_code=monitor.config.expected_status
             )
+        if incident_type == "none":
+            return
 
         incident: Incident = next(
             (
                 inc 
                 for inc in incidents 
                 if inc.monitor_id == monitor.id 
-                and inc.trigger.observed_status is None
                 and inc.type == incident_type
             ), 
             None,
@@ -120,13 +124,18 @@ async def run_monitor_check(monitorid: int):
                 service=monitor.title,
                 type=incident_type,
                 severity=REQUEST_ERROR_SEVERITY[incident_type],
-                summary="The provided url didnt respond succesfully",  # TODO
+                summary=create_incident_summary(
+                    incident_type=incident_type,
+                    url=monitor.config.url,
+                    expected_code=monitor.config.expected_status,
+                    observed_code=None if response is None else response.status_code,
+                ),
                 source=f"{monitor.config.url}",
                 trigger=TriggerCreate(
-                    type="TODO",  # TODO
+                    type="http-request" if request_error is not None else "http-status",
                     expected_status=monitor.config.expected_status,
                     observed_status=None if response is None else response.status_code,
-                    failed_attempts=1  # TODO
+                    failed_attempts=1
                 ),
                 evidence=EvidenceCreate(
                     response_time_in_ms=(int(response.elapsed.total_seconds() * 1000)
@@ -137,9 +146,9 @@ async def run_monitor_check(monitorid: int):
                     error_message=create_error_message(response, monitor.config.expected_status)
                 ),
                 resolution=ResolutionCreate(
-                    action_result="TODO",  # TODO
-                    action_taken="TODO",  # TODO
-                    date="TODO"  # TODO
+                    action_result="pending",
+                    action_taken="none",
+                    date="pending"
                 )
             ))
         else:
@@ -164,6 +173,17 @@ def create_error_message(response: Response | None, expected_code: int):
                     f"did not match the expected code {response.status_code} "
                     f"{response.reason_phrase}")
     return "Uknown Error"
+
+
+def create_incident_summary(
+        incident_type: str,
+        url: str,
+        expected_code: int,
+        observed_code: int | None) -> str:
+    if observed_code is None:
+        return f"{url} failed during the HTTP request with {incident_type.replace('-', ' ')}"
+    return (f"{url} returned HTTP {observed_code}; "
+            f"expected HTTP {expected_code}")
 
 
 def classify_request_error(error: RequestError) -> str:
