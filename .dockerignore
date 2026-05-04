@@ -5,3 +5,4 @@ routers/__pycache__/
 .gitignore
 tests/__pycache__
 .pytest_cache
+.secrets
