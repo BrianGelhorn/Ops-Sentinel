@@ -7,7 +7,7 @@ from database.crud import upload_to_database, get_all_from_database
 from database.dbmodels import Incident, Monitor
 from database.dbconection import get_db
 from schemas.incident import IncidentResponse
-router = APIRouter("/monitor/")
+router = APIRouter(prefix="/monitor/")
 
 
 @router.post("", response_model=MonitorResponse)
