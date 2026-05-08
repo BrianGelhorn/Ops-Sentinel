@@ -5,6 +5,11 @@ on:
       branches: ['dev']
     pull_request:
         
+env:
+    DB_PORT_TEST: 5433
+    POSTGRES_DB_TEST: ops_sentinel_test
+    POSTGRES_USER: opssentinel
+    POSTGRES_PASSWORD: test_password
 jobs:
     build-and-test:
         runs-on: ubuntu-latest
@@ -12,21 +17,17 @@ jobs:
             db_test:
                 image: postgres:18
                 ports:
-                - 5432:5432
+                - 5433:5432
                 env:
-                    POSTGRES_DB: ops_sentinel_test  
-                    POSTGRES_USER: test_user
+                    POSTGRES_DB: ops_sentinel_test
+                    POSTGRES_USER: opssentinel
                     POSTGRES_PASSWORD: test_password
                 options: >-
-                    --health-cmd="pg_isready -U test_user -d ops_sentinel_test"
+                    --health-cmd="pg_isready -U opssentinel -d ops_sentinel_test"
                     --health-interval=5s
                     --health-timeout=3s
                     --health-retries=5
-        env:
-            DB_PORT_TEST: 5432
-            POSTGRES_DB_TEST: ops_sentinel_test
-            POSTGRES_USER: test_user
-            POSTGRES_PASSWORD: test_password
+                    --health-start-period=5s
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
