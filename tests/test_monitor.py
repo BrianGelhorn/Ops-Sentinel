@@ -42,6 +42,12 @@ def test_check_if_healthy():
     assert response.json() == {"status": "alive"}
 
 
+def test_check_if_ready():
+    response = client.get("/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
 def test_post_monitor():
     monitor_to_post = {  
         "title": "testPost",
