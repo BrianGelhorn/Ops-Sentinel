@@ -23,6 +23,7 @@ async def get_all_monitors(db: Session = Depends(get_db)):
     monitors = get_all_from_database(Monitor, db)
     return monitors
 
+
 @router.get("get_active_incidents", response_model=list[IncidentResponse])
 async def get_active_incidents_for_monitor(monitorid: int, db: Session = Depends(get_db)):
     return (
