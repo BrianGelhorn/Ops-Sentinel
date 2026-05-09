@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/ready")
-def get_ready(db: Session = Depends(get_db)):
+async def get_ready(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
     except Exception as exc:

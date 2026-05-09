@@ -33,8 +33,8 @@ REQUEST_ERROR_SEVERITY = {
 }
 
 
-async def run_monitor_check(monitorid: int):
-    db = Session()
+async def run_monitor_check(monitorid: int, db: Session):
+    incident: Incident | None = None
     try:
         # Call to avoid 0% display
         psutil.cpu_percent(None)
@@ -46,7 +46,7 @@ async def run_monitor_check(monitorid: int):
         if monitor is None:
             incident_type = "monitor-not-found"
             source = f"monitor: {monitorid}"
-            incident: Incident = next(
+            incident: Incident | None = next(
                 (
                     inc
                     for inc in get_incidents_from_database(
@@ -88,7 +88,6 @@ async def run_monitor_check(monitorid: int):
                 incident.trigger.failed_attempts += 1
                 incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
                 incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
-            upload_to_database(incident, db)
             return
         request_error: RequestError | None = None
         try:
@@ -108,7 +107,7 @@ async def run_monitor_check(monitorid: int):
         if incident_type == "none":
             return
 
-        incident: Incident = next(
+        incident: Incident | None = next(
             (
                 inc 
                 for inc in incidents 
@@ -155,8 +154,9 @@ async def run_monitor_check(monitorid: int):
             incident.trigger.failed_attempts += 1
             incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
             incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
-        upload_to_database(incident, db)
     finally:
+        if incident is not None:
+            upload_to_database(incident, db)
         db.close()
 
 

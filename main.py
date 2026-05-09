@@ -2,17 +2,16 @@ from fastapi import FastAPI
 from routers import health, incidents, ready, monitors
 from database.dbconection import engine, DBaseModel
 from contextlib import asynccontextmanager
-from workers.scheduler import start_scheduler_loop
+from workers.scheduler import start_scheduler_loop, stop_scheduler_loop
 
 
 def create_app(testing: bool = False):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if not testing:
-            DBaseModel.metadata.create_all(engine)
             start_scheduler_loop()
-            yield
-            pass
+            DBaseModel.metadata.create_all(engine)
+        yield
     app = FastAPI(lifespan=lifespan)
     app.include_router(health.router)
     app.include_router(incidents.router)

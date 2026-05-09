@@ -3,6 +3,8 @@ from datetime import datetime
 
 
 class TriggerCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     type: str
     expected_status: int
     observed_status: int | None
@@ -10,6 +12,8 @@ class TriggerCreate(BaseModel):
 
 
 class EvidenceCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     response_time_in_ms: int | None
     last_cpu_usage_percent: float
     last_memory_usage_percent: float
@@ -17,12 +21,16 @@ class EvidenceCreate(BaseModel):
 
 
 class ResolutionCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     action_taken: str | None = None
     action_result: str | None = None
     date: str | None = None
 
 
 class IncidentCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     monitor_id: int | None
     title: str
     service: str

@@ -11,7 +11,7 @@ taskScheduler: asyncio.Task | None = None
 async def run_scheduler_loop():
     while True:
         for monitor in should_run():
-            asyncio.Task(run_monitor_check(monitor.id))
+            asyncio.Task(run_monitor_check(monitor.id, db=Session()))
         await asyncio.sleep(5)
 
 
