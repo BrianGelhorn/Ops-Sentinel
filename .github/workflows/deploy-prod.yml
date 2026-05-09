@@ -1,12 +1,126 @@
-name: Deploy Production Workflow
+name: Deploy Production Ops Sentinel
 
 on:
-    workflow_dispatch:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME:
+  IMAGE_TAG: prod
 
 jobs:
-    todo-workflow:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Todo
-              run: echo "TODO"
+  test:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set Up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest pytest-asyncio flake8
+
+      - name: Lint with Flake8
+        run: flake8 . --count --select=E,F63,F7,F82 --max-line-length=100
+
+      - name: Run python tests
+        run: python -m pytest
+
+  deploy-prod:
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Set image name in lowercase
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Log in to the Github Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ env.IMAGE_TAG }}
+            type=raw,value=latest
+            type=sha,prefix=prod-
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+
+      - name: Generate artifact attestation
+        if: ${{ !env.ACT }}
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Connect to SSH server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST_PROD }}
+          username: ${{ secrets.SSH_USERNAME_PROD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+          script: |
+            set -e
+            if [ ! -d ./Ops-Sentinel/.git ]; then
+              git clone https://github.com/${{ github.repository }}.git Ops-Sentinel
+            fi
+            cd "./Ops-Sentinel"
+            git fetch origin main
+            git checkout main
+            git pull origin main
+            cat > .env << EOF
+            IMAGE_TAG=${{ env.IMAGE_TAG }}
+            POSTGRES_DB=${{ vars.POSTGRES_DB_PROD }}
+            POSTGRES_USER=${{ vars.POSTGRES_USER_PROD }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_PROD }}
+            APP_PORT=${{ vars.APP_PORT_PROD }}
+            DB_PORT=${{ vars.DB_PORT_PROD }}
+            EOF
+            sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            sudo docker compose up -d --remove-orphans
+
+  smoke-test:
+    needs: deploy-prod
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if production API is alive
+        run: |
+          RESPONSE=$(curl -fsS "http://${{ secrets.SSH_HOST_PROD }}:${{ vars.APP_PORT_PROD }}/health")
+          STATUS=$(echo "$RESPONSE" | jq -r ".status")
+          if [ "$STATUS" != "alive" ]; then
+            echo "Production API is not alive"
+            exit 1
+          fi
+
+          echo "Production API is alive"
