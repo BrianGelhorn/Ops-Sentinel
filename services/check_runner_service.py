@@ -1,8 +1,10 @@
 from database.crud import (get_from_database, 
                            upload_to_database, 
                            create_incident, 
-                           get_incidents_from_database, 
-                           Session)
+                           get_incidents_from_database)
+from sqlalchemy.orm import Session as OrmSession
+from database.dbconection import Session as SessionLocal
+from sqlalchemy.exc import UnboundExecutionError
 from schemas.incident import (IncidentCreate, 
                               TriggerCreate, 
                               EvidenceCreate, 
@@ -33,8 +35,9 @@ REQUEST_ERROR_SEVERITY = {
 }
 
 
-async def run_monitor_check(monitorid: int, db: Session):
+async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
     incident: Incident | None = None
+    db, owns_db = ensure_bound_session(db)
     try:
         # Call to avoid 0% display
         psutil.cpu_percent(None)
@@ -105,6 +108,7 @@ async def run_monitor_check(monitorid: int, db: Session):
                 expected_code=monitor.config.expected_status
             )
         if incident_type == "none":
+            upload_to_database(monitor, db)
             return
 
         incident: Incident | None = next(
@@ -157,7 +161,19 @@ async def run_monitor_check(monitorid: int, db: Session):
     finally:
         if incident is not None:
             upload_to_database(incident, db)
+        if owns_db:
+            db.close()
+
+
+def ensure_bound_session(db: OrmSession | None) -> tuple[OrmSession, bool]:
+    if db is None or isinstance(db, type):
+        return SessionLocal(), True
+    try:
+        db.get_bind()
+    except UnboundExecutionError:
         db.close()
+        return SessionLocal(), True
+    return db, False
 
 
 def create_error_message(response: Response | None, expected_code: int):
