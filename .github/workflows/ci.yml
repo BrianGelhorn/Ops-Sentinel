@@ -2,8 +2,9 @@ name: CI Ops Sentinel
 
 on:
     push:
-      branches: ['dev']
+      branches: ['main', 'dev']
     pull_request:
+    workflow_dispatch:
         
 env:
     DB_PORT_TEST: 5434
