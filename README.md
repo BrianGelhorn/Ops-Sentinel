@@ -16,6 +16,22 @@ The system periodically checks configured services, detects failures, stores inc
 - PostgreSQL database integration
 - Docker-based local environment
 
+## Tech Stack
+- Python
+- FastAPI
+- PostgreSQL
+- SQLAlchemy
+- Docker / Docker Compose
+- GitHub Actions
+
+## Local Setup
+
+```bash
+git clone https://github.com/BrianGelhorn/Ops-Sentinel.git
+cd Ops-Sentinel
+cp .env.example .env
+docker compose up --build
+
 ## Documentation
 
 - [Incident Lifecycle](docs/incident-lifecycle.md)
