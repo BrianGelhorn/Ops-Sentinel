@@ -1,21 +1,17 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from typing import Optional
-from schemas.incident import *
+from schemas.incident import IncidentCreate, IncidentPatch, IncidentResponse
 from database.dbconection import get_db
 from database.crud import (
     create_incident, 
     upload_to_database, 
-    get_all_from_database, 
     get_incidents_from_database, 
     get_from_database)
 from database.dbmodels import Incident
 from sqlalchemy.orm import Session
-import logging
 
 
 router = APIRouter(prefix="/incidents")
-logger = logging.getLogger("uvicorn.error")
-logger.setLevel(logging.INFO)
 
 
 @router.get("", response_model=list[IncidentResponse])
@@ -38,17 +34,15 @@ async def get_all_incidents(
     return allIncidents
 
 
-@router.get("/{id}", response_model=list[IncidentResponse])
+@router.get("/{id}", response_model=IncidentResponse)
 async def get_incidents(
-    id: int | None = None, 
+    id: int,
     db: Session = Depends(get_db)
 ):
-    allIncidents = get_all_from_database(Incident, db)
-    incidents = list(
-        filter(lambda incident: 
-               incident.id == id, 
-               allIncidents))
-    return incidents
+    incident = get_from_database(Incident, id, db)
+    if incident is None:
+        raise HTTPException(status_code=404, detail="Incident Not Found")
+    return incident
 
 
 @router.post("/", 
@@ -60,7 +54,7 @@ async def post_incidents(item: IncidentCreate, db: Session = Depends(get_db)):
     return item
 
 
-@router.patch("/{id}")
+@router.patch("/{id}", response_model=IncidentResponse)
 async def patch_incidents(
     id: int, 
     incidentPatch: IncidentPatch, 
@@ -86,3 +80,4 @@ async def patch_incidents(
             incident.resolution.action_result = incidentPatch.resolution.action_result
     
     upload_to_database(incident, db) 
+    return incident

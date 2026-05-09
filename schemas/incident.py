@@ -1,5 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from typing import Literal
+
+
+IncidentStatus = Literal["open", "acknowledged", "resolved"]
 
 
 class TriggerCreate(BaseModel):
@@ -61,11 +65,11 @@ class ResolutionResponse(ResolutionCreate):
 class IncidentResponse(IncidentCreate):
     id: int
     date: datetime
-    status: str
+    status: IncidentStatus
 
 
 class IncidentPatch(BaseModel):
-    status: str | None = None
+    status: IncidentStatus | None = None
     summary: str | None = None
     severity: str | None = None
     resolution: ResolutionCreate | None = None

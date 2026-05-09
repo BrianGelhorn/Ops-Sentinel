@@ -1,8 +1,6 @@
-from database.dbconection import get_db
 from sqlalchemy.orm import Session
-from fastapi import Depends
 from database.dbmodels import Incident, Trigger, Evidence, Resolution
-from schemas.incident import *
+from schemas.incident import IncidentCreate
 from datetime import datetime, UTC
 from typing import Optional, TypeVar, Type
 
@@ -19,7 +17,7 @@ def create_incident(item: IncidentCreate) -> Incident:
                         evidence=Evidence(**evidenceData), 
                         resolution=Resolution(**resolutionData),
                         date=datetime.now(UTC),
-                        status="Uknown")
+                        status="open")
     
     return incident
 
@@ -49,7 +47,9 @@ def get_incidents_from_database(
         type: Optional[str] = None, 
         severity: Optional[str] = None,
         source: Optional[str] = None,
-        db: Session = Depends(get_db)):
+        db: Session | None = None):
+    if db is None:
+        raise ValueError("db session is required")
     query = db.query(Incident)
 
     if id is not None:
