@@ -5,10 +5,11 @@ import os
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_DB = os.getenv("POSTGRES_DB", POSTGRES_USER)
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-PORT = 5432
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "db")
+PORT = os.getenv("DB_PORT", "5432")
 DATABASE_URL = (
     f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-    f"@db:{PORT}/{POSTGRES_DB}"
+    f"@{POSTGRES_HOST}:{PORT}/{POSTGRES_DB}"
 )
 engine = create_engine(DATABASE_URL)
 
