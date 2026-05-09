@@ -31,6 +31,7 @@ git clone https://github.com/BrianGelhorn/Ops-Sentinel.git
 cd Ops-Sentinel
 cp .env.example .env
 docker compose up --build
+```
 
 ## Documentation
 
