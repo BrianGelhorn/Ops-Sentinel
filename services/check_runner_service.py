@@ -5,6 +5,9 @@ from database.crud import (get_from_database,
 from sqlalchemy.orm import Session as OrmSession
 from database.dbconection import Session as SessionLocal
 from sqlalchemy.exc import UnboundExecutionError
+from datetime import datetime
+import logging
+from collections.abc import Awaitable, Callable
 from schemas.incident import (IncidentCreate, 
                               TriggerCreate, 
                               EvidenceCreate, 
@@ -21,6 +24,8 @@ from httpx import (Response,
 import asyncio
 import psutil
 
+logger = logging.getLogger(__name__)
+
 
 REQUEST_ERROR_SEVERITY = {
     "timeout-error": "high",
@@ -35,9 +40,14 @@ REQUEST_ERROR_SEVERITY = {
 }
 
 
-async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
+async def run_monitor_check(
+    monitorid: int,
+    db: OrmSession | None = None,
+    session_factory: Callable[[], OrmSession] = SessionLocal,
+    http_get: Callable[[str], Awaitable[Response]] | None = None,
+):
     incident: Incident | None = None
-    db, owns_db = ensure_bound_session(db)
+    db, owns_db = ensure_bound_session(db, session_factory)
     try:
         # Call to avoid 0% display
         psutil.cpu_percent(None)
@@ -49,6 +59,8 @@ async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
         if monitor is None:
             incident_type = "monitor-not-found"
             source = f"monitor: {monitorid}"
+            logger.warning("monitor check skipped because monitor was not found",
+                           extra={"monitor_id": monitorid})
             incident: Incident | None = next(
                 (
                     inc
@@ -94,21 +106,25 @@ async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
             return
         request_error: RequestError | None = None
         try:
-            async with AsyncClient(timeout=5) as client:
-                response = await client.get(monitor.config.url)
+            if http_get is None:
+                async with AsyncClient(timeout=5) as client:
+                    response = await client.get(monitor.config.url)
+            else:
+                response = await http_get(monitor.config.url)
 
         except RequestError as e:
             request_error = e
+        monitor.last_checked_at = datetime.now()
         incident_type: str = "Unknown"
         if request_error is not None:
             incident_type = classify_request_error(request_error)
         if response is not None:
             incident_type = classify_response_error(
                 response=response,
-                expected_code=monitor.config.expected_status
+                expected_code=monitor.config.expected_status,
             )
         if incident_type == "none":
-            upload_to_database(monitor, db)
+            logger.debug("monitor check succeeded", extra={"monitor_id": monitorid})
             return
 
         incident: Incident | None = next(
@@ -121,6 +137,8 @@ async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
             None,
         )
         if incident is None:
+            logger.warning("monitor check failed; creating incident",
+                           extra={"monitor_id": monitorid, "incident_type": incident_type})
             incident = create_incident(IncidentCreate(
                 monitor_id=monitorid,
                 title=f"{monitor.type.title()} check failed",
@@ -141,9 +159,7 @@ async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
                     failed_attempts=1
                 ),
                 evidence=EvidenceCreate(
-                    response_time_in_ms=(int(response.elapsed.total_seconds() * 1000)
-                                         if response is not None 
-                                         else None),
+                    response_time_in_ms=get_response_time_in_ms(response),
                     last_cpu_usage_percent=psutil.cpu_percent(None),
                     last_memory_usage_percent=psutil.virtual_memory().percent,
                     error_message=create_error_message(response, monitor.config.expected_status)
@@ -158,22 +174,44 @@ async def run_monitor_check(monitorid: int, db: OrmSession | None = None):
             incident.trigger.failed_attempts += 1
             incident.evidence.last_cpu_usage_percent = psutil.cpu_percent(None)
             incident.evidence.last_memory_usage_percent = psutil.virtual_memory().percent
+            logger.info("monitor check still failing; incident updated",
+                        extra={
+                            "monitor_id": monitorid,
+                            "incident_id": incident.id,
+                            "failed_attempts": incident.trigger.failed_attempts,
+                        })
     finally:
+        if "monitor" in locals() and monitor is not None:
+            db.add(monitor)
         if incident is not None:
             upload_to_database(incident, db)
+        elif "monitor" in locals() and monitor is not None:
+            db.commit()
         if owns_db:
             db.close()
 
 
-def ensure_bound_session(db: OrmSession | None) -> tuple[OrmSession, bool]:
+def ensure_bound_session(
+    db: OrmSession | None,
+    session_factory: Callable[[], OrmSession] = SessionLocal,
+) -> tuple[OrmSession, bool]:
     if db is None or isinstance(db, type):
-        return SessionLocal(), True
+        return session_factory(), True
     try:
         db.get_bind()
     except UnboundExecutionError:
         db.close()
-        return SessionLocal(), True
+        return session_factory(), True
     return db, False
+
+
+def get_response_time_in_ms(response: Response | None) -> int | None:
+    if response is None:
+        return None
+    try:
+        return int(response.elapsed.total_seconds() * 1000)
+    except RuntimeError:
+        return None
 
 
 def create_error_message(response: Response | None, expected_code: int):
@@ -188,7 +226,7 @@ def create_error_message(response: Response | None, expected_code: int):
             return (f"The server is alive but the expected code {expected_code} "
                     f"did not match the expected code {response.status_code} "
                     f"{response.reason_phrase}")
-    return "Uknown Error"
+    return "Unknown Error"
 
 
 def create_incident_summary(
