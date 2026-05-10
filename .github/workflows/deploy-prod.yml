@@ -114,13 +114,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if production API is alive
+      - name: Check if production API is ready
         run: |
-          RESPONSE=$(curl -fsS "http://${{ secrets.SSH_HOST_PROD }}:${{ vars.APP_PORT_PROD }}/health")
-          STATUS=$(echo "$RESPONSE" | jq -r ".status")
-          if [ "$STATUS" != "alive" ]; then
-            echo "Production API is not alive"
-            exit 1
+          HEALTH_URL="http://${{ secrets.SSH_HOST_PROD }}:${{ vars.APP_PORT_PROD }}/health"
+          READY_URL="http://${{ secrets.SSH_HOST_PROD }}:${{ vars.APP_PORT_PROD }}/ready"
+
+          HEALTH_RESPONSE=$(curl -fsS "$HEALTH_URL" || true)
+          HEALTH_STATUS=$(echo "$HEALTH_RESPONSE" | jq -r ".status // empty")
+          if [ "$HEALTH_STATUS" = "alive" ]; then
+            echo "Production API health check is alive"
+          else
+            echo "Production API health check did not report alive; continuing to readiness check"
           fi
 
-          echo "Production API is alive"
+          for attempt in {1..30}; do
+            RESPONSE=$(curl -fsS "$READY_URL" || true)
+            STATUS=$(echo "$RESPONSE" | jq -r ".status // empty")
+            if [ "$STATUS" = "ready" ]; then
+              echo "Production API is ready"
+              exit 0
+            fi
+
+            echo "Production API is not ready yet (attempt $attempt/30)"
+            sleep 5
+          done
+
+          echo "Production API did not become ready"
+          exit 1
