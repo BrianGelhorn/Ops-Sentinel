@@ -81,11 +81,24 @@ def start_scheduler_loop(session_factory: Callable[[], OrmSession] = Session):
         logger.info("scheduler task created")
 
 
-def stop_scheduler_loop():
+async def stop_scheduler_loop():
     global taskScheduler
+    tasks_to_wait: list[asyncio.Task] = []
+
     if taskScheduler is not None and not taskScheduler.done():
         taskScheduler.cancel()
+        tasks_to_wait.append(taskScheduler)
         logger.info("scheduler task stopped")
-    running_tasks.clear()
+
+    for task in list(running_tasks):
+        if not task.done():
+            task.cancel()
+            tasks_to_wait.append(task)
+
     running_monitor_ids.clear()
+
+    if tasks_to_wait:
+        await asyncio.gather(*tasks_to_wait, return_exceptions=True)
+
+    running_tasks.clear()
     taskScheduler = None
