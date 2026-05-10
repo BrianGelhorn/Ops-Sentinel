@@ -16,7 +16,7 @@ def create_app(
             start_scheduler_loop(session_factory=session_factory)
         yield
         if start_scheduler:
-            stop_scheduler_loop()
+            await stop_scheduler_loop()
     app = FastAPI(lifespan=lifespan)
     app.include_router(health.router)
     app.include_router(incidents.router)
