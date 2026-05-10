@@ -86,13 +86,30 @@ jobs:
 
     steps:
       
-      - name: Check if API is alive
+      - name: Check if test API is ready
         run: |
-          RESPONSE=$(curl -X 'GET' "${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/health")
-          STATUS=$(echo $RESPONSE | jq -r ".status")
-          if [ "$STATUS" != "alive" ]; then
-            echo "API is not alive"
-            exit 1
+          HEALTH_URL="http://${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/health"
+          READY_URL="http://${{ secrets.SSH_HOST_TEST }}:${{ vars.APP_PORT }}/ready"
+
+          HEALTH_RESPONSE=$(curl -fsS "$HEALTH_URL" || true)
+          HEALTH_STATUS=$(echo "$HEALTH_RESPONSE" | jq -r ".status // empty")
+          if [ "$HEALTH_STATUS" = "alive" ]; then
+            echo "Test API health check is alive"
+          else
+            echo "Test API health check did not report alive; continuing to readiness check"
           fi
 
-          echo "API is alive"
+          for attempt in {1..30}; do
+            RESPONSE=$(curl -fsS "$READY_URL" || true)
+            STATUS=$(echo "$RESPONSE" | jq -r ".status // empty")
+            if [ "$STATUS" = "ready" ]; then
+              echo "Test API is ready"
+              exit 0
+            fi
+
+            echo "Test API is not ready yet (attempt $attempt/30)"
+            sleep 5
+          done
+
+          echo "Test API did not become ready"
+          exit 1
