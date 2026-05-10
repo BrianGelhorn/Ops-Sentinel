@@ -81,9 +81,9 @@ class Resolution(DBaseModel):
     __tablename__ = "resolution"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    action_taken: Mapped[str] = mapped_column(String, nullable=False)
-    action_result: Mapped[str] = mapped_column(String, nullable=False)
-    date: Mapped[str] = mapped_column(String, nullable=False)
+    action_taken: Mapped[str | None] = mapped_column(String, nullable=True)
+    action_result: Mapped[str | None] = mapped_column(String, nullable=True)
+    date: Mapped[str | None] = mapped_column(String, nullable=True)
     incident_id: Mapped[int] = mapped_column(
         Integer, 
         ForeignKey("incident.id"), 
