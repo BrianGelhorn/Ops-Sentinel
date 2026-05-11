@@ -1,48 +1,102 @@
 # Incident Lifecycle
 
-Ops-Sentinel detects failures in monitored services and creates incidents with trigger data, evidence and resolution information.
+Ops-Sentinel models a simple incident management workflow for monitored HTTP services. A monitor checks a configured service, compares the observed result against the expected result, and creates or updates incident data when the check fails.
 
-## 1. Detection
+## 1. Monitor configuration
 
-A monitor periodically checks a configured service URL.
+A monitor defines:
 
-The check validates:
-- HTTP status code
-- response availability
-- configured expected status
+- a human-readable title;
+- monitor type, currently `http`;
+- check interval in seconds;
+- target URL;
+- expected HTTP status code.
 
-## 2. Trigger
+The scheduler periodically selects monitors that are due to run and starts a check for each one.
 
-If the observed result does not match the expected result given in the monitor, Ops-Sentinel creates a trigger containing:
-- expected status
-- observed status
-- failed attempts
-- trigger type
+## 2. Detection
 
-## 3. Evidence
+During an HTTP check, Ops-Sentinel validates:
 
-Each incident stores evidence such as:
-- response time
-- CPU usage
-- memory usage
-- error message when available
+- whether the request completed;
+- the observed HTTP status code;
+- whether the observed status matches the configured expected status.
 
-## 4. Incident creation
+A passing check does not create a new incident.
 
-An incident is created with:
-- affected service
-- severity
-- source
-- summary
-- status
+A failing check can be classified as one of several failure types, for example:
 
-## 5. Resolution
+- timeout error;
+- connection error;
+- network error;
+- protocol error;
+- redirect error;
+- client error;
+- server error;
+- unexpected status error.
 
-When the problem is fixed, the incident can be updated with:
-- action taken
-- resolution date
-- action result
+## 3. Trigger
 
-## Goal
+When the observed result does not match the expected result, the incident stores trigger data:
 
-The objective is to simulate a basic incident management workflow similar to real DevOps/SRE environments.
+- trigger type;
+- expected status;
+- observed status when available;
+- failed attempt count.
+
+If the same monitor keeps failing with the same incident type, Ops-Sentinel increments the failed attempt count instead of creating a duplicate incident for the same failure type.
+
+## 4. Evidence
+
+Each incident stores operational evidence to help with review and troubleshooting:
+
+- response time in milliseconds when available;
+- CPU usage percentage;
+- memory usage percentage;
+- error message.
+
+This evidence is meant to give context to the failure, not to replace manual investigation.
+
+## 5. Incident creation
+
+An incident contains:
+
+- affected monitor or service;
+- incident title;
+- incident type;
+- severity;
+- summary;
+- source;
+- trigger data;
+- evidence;
+- resolution details.
+
+New incidents start with status `open`.
+
+## 6. Manual acknowledgement and resolution
+
+Incident resolution is manual by design.
+
+Ops-Sentinel does not mark an incident as `resolved` automatically just because a later monitor check succeeds. A successful check only confirms that the service responded correctly at that moment. For intermittent failures, automatic resolution could hide a real issue before the root cause is understood.
+
+An operator can update the incident when there is enough context to do so. Resolution details can include:
+
+- action taken;
+- action result;
+- resolution date.
+
+Supported statuses are:
+
+- `open`;
+- `acknowledged`;
+- `resolved`.
+
+## 7. Goal
+
+The goal is to simulate a practical DevOps/SRE workflow:
+
+1. detect a service problem;
+2. create an incident;
+3. collect trigger and evidence data;
+4. let an operator investigate;
+5. close the incident manually when the issue is understood or resolved.
